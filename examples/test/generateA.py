@@ -2,7 +2,6 @@ from __future__ import print_function
 import sys
 
 # Import necessary libraries
-import betterspy
 import numpy as np
 import pyamg
 import os
@@ -59,9 +58,9 @@ mat = assembler.createMat()
 assembler.assembleJacobian(1.0, 0.0, 0.0, res, mat)
 mat_list = mat.getMat()
 A = mat_list[0]
-fig = plt.figure(dpi=100)
-plt.spy(A, precision=0.01, markersize=0.0000001, color="blue")
-plt.imshow(A.toarray(), interpolation='nearest', cmap=plt.cm.gray)
+fig = plt.figure(figsize=(12, 12), dpi=100)
+plt.spy(A, precision=0.1, markersize=0.01, color="blue")
+# plt.imshow(A.toarray(), interpolation='nearest', cmap=plt.cm.gray)
 plt.show()
 plt.savefig('spyA.png')
 
