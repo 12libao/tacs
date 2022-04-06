@@ -37,52 +37,77 @@ def _parse_options(options, default_options, default_solver):
 
     return options
 
-def solver_options(tol=1e-9,
-                   maxiter=400,
-                   verb=False,
-                   rs_strength=('classical', {'theta': 0.25}),
-                   rs_CF='RS',  # 'RS' or 'ML'
-                   rs_presmoother=('gauss_seidel', {'sweep': 'symmetric'}),     # presmoothing function taking arguments (A,x,b), 'jacobi', 'gauss_seidel', 'block_gauss_seidel'
-                   rs_postsmoother=('gauss_seidel', {'sweep': 'symmetric'}),    # postsmoothing function taking arguments (A,x,b), 'jacobi', 'gauss_seidel', 'block_gauss_seidel'
-                   rs_max_levels=10,
-                   rs_max_coarse=500,
-                   rs_coarse_solver='pinv2',    # pinv2, pinv, or lu
-                   rs_cycle='V',    #  V, W, F, or G
-                   rs_accel='gmres',   # 'cg' or 'gmres'
-                   rs_tol=1e-12,
-                   rs_maxiter=100,
-                   sa_symmetry='hermitian',     # 'nonsymmetric', 'hermitian', 'antisymmetric'
-                   sa_strength='symmetric',     # the strength of connection: 'symmetric', 'classical', 'evolution'
-                   sa_aggregate='standard',     #  standard, naive, distance, or cg
-                   sa_smooth=('jacobi', {'omega': 4.0/3.0}),    # prolongation smoothing: 'jacobi', 'gauss_seidel', 'block_gauss_seidel'
-                   sa_presmoother=('block_gauss_seidel', {'sweep': 'symmetric'}),   # 'jacobi', 'gauss_seidel', 'block_gauss_seidel'
-                   sa_postsmoother=('block_gauss_seidel', {'sweep': 'symmetric'}),  # 'jacobi', 'gauss_seidel', 'block_gauss_seidel'
-                   sa_improve_candidates=(
-                       ('block_gauss_seidel', {'sweep': 'symmetric', 'iterations': 4}), None),  # 'jacobi', 'gauss_seidel', 'block_gauss_seidel'
-                   sa_max_levels=10,
-                   sa_max_coarse=500,
-                   sa_diagonal_dominance=False, # True or False
-                   sa_coarse_solver='pinv2', #  pinv2, pinv, or cholesky
-                   sa_cycle='V', #  V, W, F, or G
-                   sa_accel='gmres',   # 'cg' or 'gmres'
-                   sa_tol=1e-12,
-                   sa_maxiter=100,
-                   sa_keep=True, # True or False
-                   asa_num_candidates=3, # number of candidates to be considered for aggregation
-                   asa_symmetry='hermitian',     # 'nonsymmetric', 'hermitian', 'antisymmetric',
-                   asa_strength='evolution',     # the strength of connection: 'symmetric', 'classical', 'evolution'
-                   asa_aggregate='standard',     #  standard, naive, distance, or cg
-                   asa_smooth=('jacobi', {'omega': 4.0/3.0, 'degree': 2}),    # prolongation smoothing: 'jacobi', 'gauss_seidel', 'block_gauss_seidel'
-                   asa_max_levels=10, # maximum number of levels
-                    asa_max_coarse=500, # maximum number of elements in the coarse grid
-                    asa_keep=True,  # keep the coarse grid or not
-                    asa_epsilon=1e-12,  # tolerance for the coarse grid
-                    asa_coarse_solver='pinv2', #  pinv2, pinv, or cholesky
-                    asa_cycle='V', #  V, W, F, or G
-                    asa_accel='gmres',   # 'cg' or 'gmres'
-                    asa_tol=1e-12,
-                    asa_maxiter=100
-                   ):
+def solver_options(
+        tol=1e-9,
+        maxiter=400,
+        verb=False,
+        rs_strength=('classical', {
+            'theta': 0.25
+        }),
+        rs_CF='RS',  # 'RS' or 'ML'
+        rs_presmoother=(
+            'gauss_seidel', {
+                'sweep': 'symmetric'
+            }
+        ),  # presmoothing function taking arguments (A,x,b), 'jacobi', 'gauss_seidel', 'block_gauss_seidel'
+        rs_postsmoother=(
+            'gauss_seidel', {
+                'sweep': 'symmetric'
+            }
+        ),  # postsmoothing function taking arguments (A,x,b), 'jacobi', 'gauss_seidel', 'block_gauss_seidel'
+        rs_max_levels=10,
+        rs_max_coarse=500,
+        rs_coarse_solver='pinv2',  # pinv2, pinv, or lu
+        rs_cycle='V',  #  V, W, F, or G
+        rs_accel='gmres',  # 'cg' or 'gmres'
+        rs_tol=1e-12,
+        rs_maxiter=100,
+        sa_symmetry='hermitian',  # 'nonsymmetric', 'hermitian', 'antisymmetric'
+        sa_strength='symmetric',  # the strength of connection: 'symmetric', 'classical', 'evolution'
+        sa_aggregate='standard',  #  standard, naive, distance, or cg
+        sa_smooth=(
+            'jacobi', {
+                'omega': 4.0 / 3.0
+            }
+        ),  # prolongation smoothing: 'jacobi', 'gauss_seidel', 'block_gauss_seidel'
+        sa_presmoother=('block_gauss_seidel', {
+            'sweep': 'symmetric'
+        }),  # 'jacobi', 'gauss_seidel', 'block_gauss_seidel'
+        sa_postsmoother=('block_gauss_seidel', {
+            'sweep': 'symmetric'
+        }),  # 'jacobi', 'gauss_seidel', 'block_gauss_seidel'
+        sa_improve_candidates=(('block_gauss_seidel', {
+            'sweep': 'symmetric',
+            'iterations': 4
+        }), None),  # 'jacobi', 'gauss_seidel', 'block_gauss_seidel'
+        sa_max_levels=10,
+        sa_max_coarse=500,
+        sa_diagonal_dominance=False,  # True or False
+        sa_coarse_solver='cholesky',  # ‘splu’, ‘lu’, ‘cholesky, ‘pinv’, ‘gauss_seidel’, ‘pinv2’
+        sa_cycle='V',  #  V, W, F, or G
+        sa_accel='gmres',  # 'cg' or 'gmres'
+        sa_tol=1e-12,
+        sa_maxiter=100,
+        sa_keep=True,  # True or False
+        asa_num_candidates=3,  # number of candidates to be considered for aggregation
+        asa_symmetry='hermitian',  # 'nonsymmetric', 'hermitian', 'antisymmetric',
+        asa_strength='evolution',  # the strength of connection: 'symmetric', 'classical', 'evolution'
+        asa_aggregate='standard',  #  standard, naive, distance, or cg
+        asa_smooth=(
+            'jacobi', {
+                'omega': 4.0 / 3.0,
+                'degree': 2
+            }
+        ),  # prolongation smoothing: 'jacobi', 'gauss_seidel', 'block_gauss_seidel'
+        asa_max_levels=10,  # maximum number of levels
+        asa_max_coarse=500,  # maximum number of elements in the coarse grid
+        asa_keep=True,  # keep the coarse grid or not
+        asa_epsilon=1e-12,  # tolerance for the coarse grid
+        asa_coarse_solver='pinv2',  #  pinv2, pinv, or cholesky
+        asa_cycle='V',  #  V, W, F, or G
+        asa_accel='gmres',  # 'cg' or 'gmres'
+        asa_tol=1e-12,
+        asa_maxiter=100):
 
     """Returns available solvers with default |solver_options| for the PyAMG backend.
 
@@ -268,7 +293,8 @@ def solveEqSystem(A, options=None, default_solver='pyamg_sa'):
                                                improve_candidates=options['improve_candidates'],
                                                max_levels=options['max_levels'],
                                                max_coarse=options['max_coarse'],
-                                               diagonal_dominance=options['diagonal_dominance'])
+                                               diagonal_dominance=options['diagonal_dominance'],
+                                               coarse_solver=options['coarse_solver'])
         x = ml.solve(b,
                      tol=options['tol'],
                      maxiter=options['maxiter'],
@@ -287,7 +313,8 @@ def solveEqSystem(A, options=None, default_solver='pyamg_sa'):
                                                     max_levels=options['max_levels'],
                                                     max_coarse=options['max_coarse'],
                                                     keep=options['keep'],
-                                                    epsilon=options['epsilon'])
+                                                    epsilon=options['epsilon'],
+                                                    coarse_solver=options['coarse_solver'])
         x = ml.solve(b,
                      tol=options['tol'],
                      maxiter=options['maxiter'],
@@ -315,8 +342,8 @@ def test(A, solvers, options=None):
         print('Residual norm: %.2e' % residual_norm)
         print('Time: %.3f' % timer)
         print(ml)
-        print("The Multigrid Hierarchy")
-        print("-----------------------")
+        # print("The Multigrid Hierarchy")
+        # print("-----------------------")
         # for l in range(len(ml.levels)):
         #     An = ml.levels[l].A.shape[0]
         #     Am = ml.levels[l].A.shape[1]
@@ -338,7 +365,7 @@ if __name__ == '__main__':
     # Generate the matrix
     stencil = [[-1, -1, -1], [-1, 8, -1], [-1, -1, -1]]
     A = pyamg.gallery.stencil_grid(
-        stencil, (1000, 1000), dtype=float, format='bsr')
+        stencil, (150, 150), dtype=float, format='bsr')
     solvers = [
         "direct", "pyamg_solve", "pyamg_rs", "pyamg_sa", "pyamg_asa"
     ]
