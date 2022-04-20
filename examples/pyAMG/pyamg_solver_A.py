@@ -89,7 +89,7 @@ def solver_options(
         sa_tol=1e-12,
         sa_maxiter=100,
         sa_keep=True,  # True or False
-        asa_num_candidates=3,  # number of candidates to be considered for aggregation
+        asa_num_candidates=1,  # number of candidates to be considered for aggregation
         asa_symmetry='hermitian',  # 'nonsymmetric', 'hermitian', 'antisymmetric',
         asa_strength='evolution',  # the strength of connection: 'symmetric', 'classical', 'evolution'
         asa_aggregate='standard',  #  standard, naive, distance, or cg
@@ -100,7 +100,7 @@ def solver_options(
             }
         ),  # prolongation smoothing: 'jacobi', 'gauss_seidel', 'block_gauss_seidel'
         asa_max_levels=10,  # maximum number of levels
-        asa_max_coarse=500,  # maximum number of elements in the coarse grid
+        asa_max_coarse=5,  # maximum number of elements in the coarse grid
         asa_keep=True,  # keep the coarse grid or not
         asa_epsilon=1e-12,  # tolerance for the coarse grid
         asa_coarse_solver='pinv2',  #  pinv2, pinv, or cholesky
@@ -246,7 +246,9 @@ def solveEqSystem(A, options=None, default_solver='pyamg_sa'):
     """
     t0 = time.time()
     options = _parse_options(options, solver_options(), default_solver)
-    b = np.ones((A.shape[0], 1))
+    # b = np.ones((A.shape[0], 1))
+    b = np.random.rand(A.shape[0])
+    x0 = np.random.rand(A.shape[0])
     res = []
 
     if options['type'] == 'direct':
@@ -317,6 +319,7 @@ def solveEqSystem(A, options=None, default_solver='pyamg_sa'):
                                                     epsilon=options['epsilon'],
                                                     coarse_solver=options['coarse_solver'])
         x = ml.solve(b,
+                     x0=x0,
                      tol=options['tol'],
                      maxiter=options['maxiter'],
                      cycle=options['cycle'],
@@ -371,6 +374,6 @@ if __name__ == '__main__':
     # A = generateA()
 
     # Set the solvers
-    # solvers = ["direct", "pyamg_solve", "pyamg_rs", "pyamg_sa", "pyamg_asa"]
-    solvers = ["pyamg_solve"]
+    solvers = ["direct", "pyamg_solve", "pyamg_rs", "pyamg_sa", "pyamg_asa"]
+    # solvers = ["pyamg_asa"]
     test(A, solvers)
