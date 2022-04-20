@@ -250,6 +250,7 @@ def solveEqSystem(A, options=None, default_solver='pyamg_sa'):
     res = []
 
     if options['type'] == 'direct':
+        # Direct solver from scipy.sparse.linalg
         A = A.tocsr()
         x, ml= splinalg.spsolve(A, b), 0
     elif options['type'] == 'pyamg_solve':
@@ -366,7 +367,10 @@ if __name__ == '__main__':
     stencil = [[-1, -1, -1], [-1, 8, -1], [-1, -1, -1]]
     A = pyamg.gallery.stencil_grid(
         stencil, (150, 150), dtype=float, format='bsr')
-    solvers = [
-        "direct", "pyamg_solve", "pyamg_rs", "pyamg_sa", "pyamg_asa"
-    ]
+
+    # A = generateA()
+
+    # Set the solvers
+    # solvers = ["direct", "pyamg_solve", "pyamg_rs", "pyamg_sa", "pyamg_asa"]
+    solvers = ["pyamg_solve"]
     test(A, solvers)

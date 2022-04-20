@@ -1,4 +1,4 @@
-from __future__ import print_function   
+from __future__ import print_function
 import sys
 
 # Import necessary libraries
@@ -57,7 +57,7 @@ def generateA():
     mat = assembler.createMat()
     assembler.assembleJacobian(1.0, 0.0, 0.0, res, mat)
     mat_list = mat.getMat()
-    A = mat_list[0]        
+    A = mat_list[0]
 
     # stencil = [[-1, -1, -1], [-1, 8, -1], [-1, -1, -1]]
     # A = pyamg.gallery.stencil_grid(
@@ -71,6 +71,88 @@ def generateA():
         f'Shape of the matrix: {A.shape[0]} x {A.shape[1]} \n'
         f'Format of the matrix: {A.format}\n')
     print(A)
+
+    # pick a random right hand side & construct the multigrid hierarchy
+    B = np.ones((A.shape[0], 1))
+    # ml = pyamg.smoothed_aggregation_solver(A, B, BH=None,                     # the representation of the left near null space
+    #                                     symmetry='hermitian',              # indicate that the matrix Hermitian
+    #                                     strength='evolution',              # change the strength of connection
+    #                                     aggregate='standard',              # use a standard aggregation method
+    #                                     # prolongation smoothing
+    #                                     smooth=('jacobi', {'omega': 4.0 / 3.0, 'degree': 2}),
+    #                                     presmoother=('block_gauss_seidel', {'sweep': 'symmetric'}),
+    #                                     postsmoother=('block_gauss_seidel', {'sweep': 'symmetric'}),
+    #                                     improve_candidates=[('block_gauss_seidel', {'sweep': 'symmetric', 'iterations': 10}), None],
+    #                                     max_levels=10,                     # maximum number of levels
+    #                                     max_coarse=5,                      # maximum number on a coarse level
+    #                                     keep=False)
+
+    [ml, work] = pyamg.aggregation.adaptive_sa_solver(
+        A,
+        num_candidates=1,
+        symmetry='hermitian',  # indicate that the matrix is Hermitian
+        strength='evolution',  # change the strength of connection
+        aggregate='standard',  # use a standard aggregation method
+        # prolongation smoothing
+        smooth=('jacobi', {
+            'omega': 4.0 / 3.0,
+            'degree': 2
+        }),
+        max_levels=10,  # maximum number of levels
+        max_coarse=5,  # maximum number on a coarse level
+        keep=True,
+        epsilon=1e-12)
+
+    residuals = []
+    b = np.random.rand(A.shape[0])
+    x0 = np.random.rand(A.shape[0])
+    # Krylov solvers (cg, bicgstab, gmres, fgmres, cgnr)
+    x = ml.solve(b=b,
+                 x0=x0,
+                 tol=1e-12,
+                 residuals=residuals,
+                 accel='gmres',
+                 maxiter=100,
+                 cycle='V')
+
+    # M = ml.aspreconditioner(cycle='W')
+    # x, info = cg(A, b, atol=1e-8,  maxiter=300, M=M)
+
+    print("\n")
+    print("Details: Default AMG")
+    print("--------------------")
+    print(ml)  # print hierarchy information
+
+    # compute norm of residual vector
+    print("The residual norm is {}".format(np.linalg.norm(b - A * x)))
+
+    print("\n")
+    print("The Multigrid Hierarchy")
+    print("-----------------------")
+    for l in range(len(ml.levels)):
+        An = ml.levels[l].A.shape[0]
+        Am = ml.levels[l].A.shape[1]
+        if l == (len(ml.levels) - 1):
+            print(f"A_{l}: {An:>10}x{Am:<10}")
+        else:
+            Pn = ml.levels[l].P.shape[0]
+            Pm = ml.levels[l].P.shape[1]
+            print(f"A_{l}: {An:>10}x{Am:<10}   P_{l}: {Pn:>10}x{Pm:<10}")
+
+    fig, ax = plt.subplots()
+    # ax.semilogy(res1, label='Default AMG solver')
+    ax.semilogy(residuals, label='Specialized AMG solver')
+    ax.set_xlabel('Iteration')
+    ax.set_ylabel('Relative Residual')
+    ax.grid(True)
+    plt.legend()
+
+    figname = f'./output/amg_convergence.png'
+    if '--savefig' in sys.argv:
+        plt.savefig(figname, bbox_inches='tight', dpi=150)
+    else:
+
+        plt.show()
 
     return A
 
